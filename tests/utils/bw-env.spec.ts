@@ -31,6 +31,12 @@ describe('buildBwChildEnv', () => {
     expect(env['USER']).toBe('test-user');
   });
 
+  it('passes through the resolved bw executable for a launchd session provider', () => {
+    process.env['BW_BIN'] = '/opt/test/bin/bw';
+    const env = buildBwChildEnv();
+    expect(env['BW_BIN']).toBe('/opt/test/bin/bw');
+  });
+
   it('does not forward API client credentials to the child', () => {
     process.env['BW_CLIENT_ID'] = 'organization.secret-id';
     process.env['BW_CLIENT_SECRET'] = 'super-secret';
