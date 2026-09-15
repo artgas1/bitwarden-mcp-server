@@ -19,6 +19,7 @@ export function buildBwChildEnv(extra?: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
     // Filesystem / data dir
     'PATH',
     'HOME',
+    'USER',
     'USERPROFILE',
     'APPDATA',
     'LOCALAPPDATA',

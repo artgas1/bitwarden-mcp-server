@@ -27,9 +27,11 @@ The MCP server exposes two distinct operational interfaces:
 ```
 AI Client (Claude Desktop)
     ↓
-MCP Protocol (stdio transport)
+MCP Protocol (stdio, or loopback Streamable HTTP)
     ↓
-index.ts (tool routing)
+index.ts (transport selection)
+    ↓
+server.ts (shared tool catalog and routing)
     ↓
 ┌─────────────────────┬──────────────────────┐
 │   CLI Handler       │   API Handler        │
@@ -39,6 +41,12 @@ index.ts (tool routing)
 │   Bitwarden CLI     │   Bitwarden API      │
 └─────────────────────┴──────────────────────┘
 ```
+
+The zero-argument entry point remains stdio-compatible. HTTP mode requires
+both `--http-host 127.0.0.1` and `--http-port <port>`. `src/http.ts` owns the
+loopback/Host/Origin checks, request and concurrency bounds, sessionless
+2026-07-28 dispatcher, and isolated legacy SDK sessions. Transport code must
+delegate tool calls to `server.ts` so stdio and HTTP cannot drift.
 
 ## Code Organization
 
@@ -79,6 +87,15 @@ because it must collect a master password without exposing it to the LLM.
 - **`handleLock` clears `BW_SESSION`** — on successful lock, the server
   removes `BW_SESSION` from `process.env` so subsequent CLI calls fail
   until the next unlock.
+
+For a shared HTTP daemon, `BW_SESSION_PROVIDER=bw-session` replaces the native
+dialog path with the machine-local provider. Startup calls
+`bw-session --quiet` and remains available in a locked state if no token is
+available. The MCP `unlock` tool calls `bw-session` without arguments from
+inside the existing mutex/cooldown. Provider stdout is bounded, stderr is
+discarded, and its token is installed only after an independent `bw status`
+validation. Never pass the provider command through a shell or expose its
+output in logs or MCP results.
 
 Any future change to the unlock flow must preserve all of these
 invariants.

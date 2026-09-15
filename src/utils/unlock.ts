@@ -11,6 +11,10 @@ import { spawn } from 'child_process';
 import crypto from 'crypto';
 import { resolveBwInvocation } from './bw-cli.js';
 import { buildBwChildEnv } from './bw-env.js';
+import {
+  unlockSharedSession,
+  usesSharedSessionProvider,
+} from './shared-session.js';
 
 /**
  * Module-local indirection for `child_process.spawn` so tests can
@@ -107,6 +111,19 @@ export async function runUnlockFlow(): Promise<UnlockResult> {
     if (await checkAlreadyUnlocked()) {
       consecutiveFailures = 0;
       return { success: true, message: 'Vault is already unlocked.' };
+    }
+
+    if (usesSharedSessionProvider()) {
+      const sharedResult = await unlockSharedSession();
+      if (sharedResult.success) {
+        consecutiveFailures = 0;
+        return {
+          success: true,
+          message: 'Shared Bitwarden session unlocked successfully.',
+        };
+      }
+      recordFailure();
+      return sharedResult;
     }
 
     const passwordResult = await collectPasswordViaDialog();
