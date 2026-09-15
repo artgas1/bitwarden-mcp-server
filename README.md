@@ -183,6 +183,21 @@ sessions. Omitting the HTTP flags preserves the default stdio transport.
 Both HTTP flags are required, and the host must be exactly `127.0.0.1`. Do not
 forward or proxy this port to another interface.
 
+When one HTTP daemon is shared by several clients, it can use a machine-local
+`bw-session` executable as the sole session-token provider:
+
+```bash
+BW_SESSION_PROVIDER=bw-session \
+  node dist/index.js --http-host 127.0.0.1 --http-port 13420
+```
+
+At startup the server calls `bw-session --quiet`; the MCP `unlock` tool calls
+`bw-session` interactively. Provider output is bounded and independently
+validated with `bw status` before `BW_SESSION` is installed in the daemon
+process. The master password and session token never cross the MCP protocol.
+This opt-in integration expects an existing, trusted `bw-session` executable
+on `PATH`; it is not enabled by default.
+
 ### Environment Variables
 
 | Variable                 | Required For    | Description                                                                                                                                                                                | Default                          |
@@ -194,6 +209,7 @@ forward or proxy this port to another interface.
 | `BW_IDENTITY_URL`        | API operations  | OAuth2 identity server URL                                                                                                                                                                 | `https://identity.bitwarden.com` |
 | `BW_ALLOWED_DIRECTORIES` | File operations | Comma-separated list of allowed file directories. **Required** for file-based tools (e.g. `create_file_send`, `create_attachment`); when unset, all file operations are rejected.          | -                                |
 | `BW_CLI_PATH`            | CLI operations  | Absolute path to the `bw` executable or its JS entry point. Only needed when the CLI cannot be auto-located on `PATH` (e.g. it is not on `PATH`, or a non-standard global install layout). | auto-resolved from `PATH`        |
+| `BW_SESSION_PROVIDER`    | Shared HTTP use | Set exactly to `bw-session` to source one validated process-wide session from the trusted machine-local provider.                                                                          | -                                |
 
 **Note:** For self-hosted Bitwarden instances, set `BW_API_BASE_URL` and `BW_IDENTITY_URL` to your server URLs.
 

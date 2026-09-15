@@ -88,6 +88,15 @@ because it must collect a master password without exposing it to the LLM.
   removes `BW_SESSION` from `process.env` so subsequent CLI calls fail
   until the next unlock.
 
+For a shared HTTP daemon, `BW_SESSION_PROVIDER=bw-session` replaces the native
+dialog path with the machine-local provider. Startup calls
+`bw-session --quiet` and remains available in a locked state if no token is
+available. The MCP `unlock` tool calls `bw-session` without arguments from
+inside the existing mutex/cooldown. Provider stdout is bounded, stderr is
+discarded, and its token is installed only after an independent `bw status`
+validation. Never pass the provider command through a shell or expose its
+output in logs or MCP results.
+
 Any future change to the unlock flow must preserve all of these
 invariants.
 

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { parseHttpCliOptions, startHttpServer } from './http.js';
 import { createServer } from './server.js';
+import { initializeSharedSession } from './utils/shared-session.js';
 
 async function run(): Promise<void> {
   const httpOptions = parseHttpCliOptions(process.argv.slice(2));
@@ -16,6 +17,7 @@ async function run(): Promise<void> {
     return;
   }
 
+  await initializeSharedSession();
   const service = await startHttpServer(httpOptions);
   console.error(
     `Bitwarden MCP Server running at http://${service.host}:${service.port}/mcp`,

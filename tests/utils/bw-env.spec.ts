@@ -25,6 +25,12 @@ describe('buildBwChildEnv', () => {
     expect(env['SYSTEMROOT']).toBe('C:\\Windows');
   });
 
+  it('passes through USER for machine-local credential providers', () => {
+    process.env['USER'] = 'test-user';
+    const env = buildBwChildEnv();
+    expect(env['USER']).toBe('test-user');
+  });
+
   it('does not forward API client credentials to the child', () => {
     process.env['BW_CLIENT_ID'] = 'organization.secret-id';
     process.env['BW_CLIENT_SECRET'] = 'super-secret';
