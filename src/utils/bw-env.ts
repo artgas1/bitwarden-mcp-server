@@ -24,6 +24,10 @@ export function buildBwChildEnv(extra?: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
     'APPDATA',
     'LOCALAPPDATA',
     'BITWARDENCLI_APPDATA_DIR',
+    // Machine-local shared-session providers may run with launchd's stable
+    // PATH while the Bitwarden CLI itself was installed through nvm. The
+    // daemon resolves that executable once and passes only its absolute path.
+    'BW_BIN',
     // Windows essentials. `bw` is a Node.js process (we invoke it via the
     // Node runtime / its npm shim on Windows — see bw-cli.ts), and Node on
     // Windows needs SystemRoot to initialize crypto, DNS, and other Win32
