@@ -254,13 +254,26 @@ export const secureNoteSchema = z.object({
   type: z.literal(0).optional(),
 });
 
+// Standard Bitwarden SSH key fields. Editing may update any subset.
+export const sshKeySchema = z.object({
+  privateKey: z.string().min(1),
+  publicKey: z.string().min(1),
+  keyFingerprint: z.string().min(1),
+});
+
 // Schema for validating 'create item' command parameters
 export const createItemSchema = z
   .object({
     // Name of the item to create
     name: z.string().min(1, 'Name is required'),
-    // Type of item (1: Login, 2: Secure Note, 3: Card, 4: Identity)
-    type: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+    // Type of item (1: Login, 2: Secure Note, 3: Card, 4: Identity, 5: SSH Key)
+    type: z.union([
+      z.literal(1),
+      z.literal(2),
+      z.literal(3),
+      z.literal(4),
+      z.literal(5),
+    ]),
     // Optional notes for the item
     notes: z.string().optional(),
     // Login details (required for login items)
@@ -271,6 +284,7 @@ export const createItemSchema = z
     identity: identitySchema.optional(),
     // Secure note details (required for secure note items)
     secureNote: secureNoteSchema.optional(),
+    sshKey: sshKeySchema.optional(),
     // Folder ID to assign the item to
     folderId: z.string().optional(),
   })
@@ -289,11 +303,13 @@ export const createItemSchema = z
       if (data.type === 4 && !data.identity) {
         return false;
       }
+      if (data.type === 5 && !data.sshKey) return false;
+      if (data.type !== 5 && data.sshKey) return false;
       return true;
     },
     {
       message:
-        'Type-specific data is required: login for type 1, secureNote for type 2, card for type 3, identity for type 4',
+        'Type-specific data is required: login for type 1, secureNote for type 2, card for type 3, identity for type 4, sshKey exclusively for type 5',
     },
   );
 
@@ -399,6 +415,7 @@ export const editItemSchema = z.object({
   identity: editIdentitySchema.optional(),
   // Updated secure note information
   secureNote: editSecureNoteSchema.optional(),
+  sshKey: sshKeySchema.partial().optional(),
   // New folder ID to assign the item to
   folderId: z.string().optional(),
 });

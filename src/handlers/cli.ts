@@ -178,8 +178,17 @@ export const handleGenerate = withValidation(
 export const handleCreateItem = withValidation(
   createItemSchema,
   async (validatedArgs) => {
-    const { name, type, notes, login, card, identity, secureNote, folderId } =
-      validatedArgs;
+    const {
+      name,
+      type,
+      notes,
+      login,
+      card,
+      identity,
+      secureNote,
+      sshKey,
+      folderId,
+    } = validatedArgs;
 
     // Creating an item with the specified type
     const item: BitwardenItem = {
@@ -254,6 +263,8 @@ export const handleCreateItem = withValidation(
       if (identity.licenseNumber !== undefined)
         identityData.licenseNumber = identity.licenseNumber;
       item.identity = identityData;
+    } else if (type === 5 && sshKey) {
+      item.sshKey = { ...sshKey };
     }
 
     const itemJson = JSON.stringify(item);
@@ -279,8 +290,17 @@ export const handleCreateFolder = withValidation(
 export const handleEditItem = withValidation(
   editItemSchema,
   async (validatedArgs) => {
-    const { id, name, notes, login, card, identity, secureNote, folderId } =
-      validatedArgs;
+    const {
+      id,
+      name,
+      notes,
+      login,
+      card,
+      identity,
+      secureNote,
+      sshKey,
+      folderId,
+    } = validatedArgs;
 
     // First, get the existing item
     const getResponse = await executeCliCommand('get', ['item', id]);
@@ -386,6 +406,26 @@ export const handleEditItem = withValidation(
           ...(secureNote.type !== undefined && { type: secureNote.type }),
         };
         existingItem.secureNote = updatedSecureNote;
+      }
+
+      if (sshKey !== undefined) {
+        if (existingItem.type !== 5) {
+          return toMcpFormat({
+            errorOutput: 'SSH key fields require an existing type 5 item.',
+          });
+        }
+        existingItem.sshKey = {
+          ...existingItem.sshKey,
+          ...(sshKey.privateKey !== undefined && {
+            privateKey: sshKey.privateKey,
+          }),
+          ...(sshKey.publicKey !== undefined && {
+            publicKey: sshKey.publicKey,
+          }),
+          ...(sshKey.keyFingerprint !== undefined && {
+            keyFingerprint: sshKey.keyFingerprint,
+          }),
+        };
       }
 
       const updatesJson = JSON.stringify(existingItem);
