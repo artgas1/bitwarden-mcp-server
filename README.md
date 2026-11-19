@@ -1,3 +1,16 @@
+## Personal fork: SSH key items
+
+This fork is based on [artgas1/bitwarden-mcp-server](https://github.com/artgas1/bitwarden-mcp-server), which derives from Bitwarden's MCP server. The upstream license is retained.
+
+`create_item` supports `type: 5` with the standard `sshKey` object:
+`privateKey`, `publicKey`, and `keyFingerprint` (all non-empty strings).
+`edit_item` accepts any subset of these fields for an existing type 5 item,
+while preserving untouched fields and other item metadata. It rejects SSH fields
+on other item types. No key material is stored in notes or custom fields.
+
+The CLI must support SSH key items. Rebuild and restart the MCP service to load
+the updated tools; connected clients may also need to refresh their tool list.
+
 # Bitwarden MCP Server
 
 A Model Context Protocol (MCP) server that provides AI assistants with secure access to Bitwarden password manager functionality through two complementary interfaces:

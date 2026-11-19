@@ -192,7 +192,7 @@ export const generateTool: Tool = {
 export const createItemTool: Tool = {
   name: 'create_item',
   description:
-    'Create a new item (login, secure note, card, or identity) in your vault',
+    'Create a new item (login, secure note, card, identity, or SSH key) in your vault',
   inputSchema: {
     type: 'object',
     properties: {
@@ -203,8 +203,8 @@ export const createItemTool: Tool = {
       type: {
         type: 'number',
         description:
-          'Type of item to create (1: Login, 2: Secure Note, 3: Card, 4: Identity)',
-        enum: [1, 2, 3, 4],
+          'Type of item to create (1: Login, 2: Secure Note, 3: Card, 4: Identity, 5: SSH Key)',
+        enum: [1, 2, 3, 4, 5],
       },
       notes: {
         type: 'string',
@@ -247,6 +247,28 @@ export const createItemTool: Tool = {
             description: 'TOTP secret for the login',
           },
         },
+      },
+      sshKey: {
+        type: 'object',
+        description: 'Standard SSH key fields (type 5 items only)',
+        properties: {
+          privateKey: {
+            type: 'string',
+            minLength: 1,
+            description: 'Private key in OpenSSH or PEM format',
+          },
+          publicKey: {
+            type: 'string',
+            minLength: 1,
+            description: 'SSH public key',
+          },
+          keyFingerprint: {
+            type: 'string',
+            minLength: 1,
+            description: 'SSH public key fingerprint',
+          },
+        },
+        required: ['privateKey', 'publicKey', 'keyFingerprint'],
       },
       secureNote: {
         type: 'object',
@@ -396,7 +418,7 @@ export const createFolderTool: Tool = {
 export const editItemTool: Tool = {
   name: 'edit_item',
   description:
-    'Edit an existing item (login, secure note, card, or identity) in your vault',
+    'Edit an existing item (login, secure note, card, identity, or SSH key) in your vault',
   inputSchema: {
     type: 'object',
     properties: {
@@ -447,6 +469,27 @@ export const editItemTool: Tool = {
           totp: {
             type: 'string',
             description: 'TOTP secret for the login',
+          },
+        },
+      },
+      sshKey: {
+        type: 'object',
+        description: 'Standard SSH key fields (type 5 items only)',
+        properties: {
+          privateKey: {
+            type: 'string',
+            minLength: 1,
+            description: 'Private key in OpenSSH or PEM format',
+          },
+          publicKey: {
+            type: 'string',
+            minLength: 1,
+            description: 'SSH public key',
+          },
+          keyFingerprint: {
+            type: 'string',
+            minLength: 1,
+            description: 'SSH public key fingerprint',
           },
         },
       },

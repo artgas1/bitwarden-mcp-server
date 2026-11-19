@@ -62,6 +62,11 @@ export interface BitwardenItem {
     passportNumber?: string;
     licenseNumber?: string;
   };
+  sshKey?: {
+    privateKey?: string;
+    publicKey?: string;
+    keyFingerprint?: string;
+  };
   secureNote?: {
     type?: number;
   };
